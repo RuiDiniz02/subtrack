@@ -9,6 +9,9 @@ const withPWA = require('next-pwa')({
 });
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    // ...
+  },
   // ... as suas outras configurações do Next.js, se tiver alguma, entram aqui
 };
 

@@ -1,5 +1,7 @@
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { AuthProvider } from "@/contexts/AuthContext"; // Importar
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -17,14 +19,13 @@ export default function RootLayout({
   return (
     <html lang="pt">
       <head>
-        {/* A LINHA MAIS IMPORTANTE ESTÁ AQUI */}
         <link rel="manifest" href="/manifest.json" />
-        
-        {/* Outras tags podem estar aqui, como a dos ícones */}
         <link rel="apple-touch-icon" href="/icon-192x192.png"></link>
-        <meta name="theme-color" content="#1f2937" />
+        <meta name="theme-color" content="#4F46E5" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
