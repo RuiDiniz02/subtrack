@@ -3,10 +3,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, db } from '@/contexts/AuthContext'; // Importar do contexto
-import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, setLogLevel, DocumentData } from 'firebase/firestore';
+import { useAuth, db } from '@/contexts/AuthContext';
+import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, setLogLevel } from 'firebase/firestore';
 import type { Subscription } from '@/lib/types';
 
+import Header from './Header';
+import BottomNavbar from './BottomNavbar';
 import StatCard from './StatCard';
 import SubscriptionItem from './SubscriptionItem';
 import SubscriptionModal from './SubscriptionModal';
@@ -101,16 +103,9 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="bg-base-200 text-text-main min-h-screen">
+        <div className="bg-base-200 text-text-main min-h-screen pb-24">
+            <Header />
             <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
-                <header className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-text-main">Subtrack</h1>
-                    <button onClick={handleAddClick} className="flex items-center gap-2 bg-primary hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                        <PlusCircleIcon />
-                        <span className="hidden sm:inline">Adicionar</span>
-                    </button>
-                </header>
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <StatCard title="Custo Mensal Estimado" value={`€${dashboardStats.monthly}`} />
                     <StatCard title="Custo Anual Total" value={`€${dashboardStats.yearly}`} />
@@ -136,6 +131,9 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
+            
+            <BottomNavbar onAddClick={handleAddClick} />
+
             {isModalOpen && (
                 <SubscriptionModal onClose={handleCloseModal} onSave={handleSaveSubscription} initialData={editingSubscription} />
             )}

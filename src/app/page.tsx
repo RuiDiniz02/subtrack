@@ -12,10 +12,9 @@ export default function LandingPage() {
     return <div className="flex items-center justify-center h-screen bg-base-200">A carregar...</div>;
   }
 
-  // Se o utilizador já estiver logado, redireciona para o dashboard
   if (user) {
     router.push('/dashboard');
-    return null; // Renderiza nada enquanto redireciona
+    return null;
   }
 
   return (
@@ -24,10 +23,9 @@ export default function LandingPage() {
       <p className="text-xl text-text-light max-w-2xl mb-8">
         Assuma o controlo das suas subscrições. Saiba exatamente quanto gasta e descubra onde pode poupar.
       </p>
-      <Link href="/login" className="bg-primary text-white font-bold py-3 px-8 rounded-lg text-lg hover:opacity-90 transition-opacity">
+      <Link href="/login" className="bg-primary text-white font-bold py-3 px-8 rounded-lg text-lg hover:opacity-90 transition-opacity cursor-pointer">
         Começar Agora
       </Link>
     </div>
   );
 }
-

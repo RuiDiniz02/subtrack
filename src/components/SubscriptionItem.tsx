@@ -38,10 +38,10 @@ export default function SubscriptionItem({ subscription, onEdit, onDelete }: Sub
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
                 <p className="text-lg font-semibold text-text-main">€{subscription.price.toFixed(2)}</p>
-                <button onClick={onEdit} className="text-text-light hover:text-primary transition-colors p-2 rounded-full" aria-label={`Editar ${subscription.name}`}>
+                <button onClick={onEdit} className="text-text-light hover:text-primary transition-colors p-2 rounded-full cursor-pointer" aria-label={`Editar ${subscription.name}`}>
                     <EditIcon />
                 </button>
-                <button onClick={onDelete} className="text-text-light hover:text-error transition-colors p-2 rounded-full" aria-label={`Remover ${subscription.name}`}>
+                <button onClick={onDelete} className="text-text-light hover:text-error transition-colors p-2 rounded-full cursor-pointer" aria-label={`Remover ${subscription.name}`}>
                     <Trash2Icon />
                 </button>
             </div>
