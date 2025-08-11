@@ -54,7 +54,7 @@ export default function SubscriptionModal({ onClose, onSave, initialData }: Subs
             ).slice(0, 5);
             setSearchResults(results as Service[]);
         }, 200),
-        [] // As dependências estão vazias porque a função não depende de props ou estado externo
+        []
     );
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

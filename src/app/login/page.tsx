@@ -1,15 +1,34 @@
+
 'use client';
 
-import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { useAuth } from '@/contexts/AuthContext';
+import { GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { auth, useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function LoginPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
+  // Verifica o resultado do redirecionamento do Google
+  useEffect(() => {
+    const checkRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          // O utilizador acabou de fazer login com sucesso
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        console.error("Erro ao obter o resultado do redirecionamento:", error);
+        setIsSigningIn(false);
+      }
+    };
+    checkRedirect();
+  }, [router]);
+
+  // Redireciona se o utilizador já estiver logado
   useEffect(() => {
     if (!loading && user) {
       router.push('/dashboard');
@@ -17,15 +36,17 @@ export default function LoginPage() {
   }, [user, loading, router]);
 
   const handleGoogleSignIn = async () => {
+    setIsSigningIn(true);
     const provider = new GoogleAuthProvider();
     try {
       await signInWithRedirect(auth, provider);
     } catch (error) {
-      console.error("Erro ao fazer login com o Google:", error);
+      console.error("Erro ao iniciar o login com o Google:", error);
+      setIsSigningIn(false);
     }
   };
 
-  if (loading || user) {
+  if (loading || user || isSigningIn) {
     return <div className="flex items-center justify-center h-screen bg-base-200">Redirecting...</div>;
   }
 
