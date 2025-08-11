@@ -1,3 +1,4 @@
+
 @import "tailwindcss";
 
 @theme {
@@ -9,4 +10,6 @@
   --color-error: oklch(64.2% 0.19 25.4);        /* #EF4444 */
   --color-base-100: oklch(100% 0 0);            /* #FFFFFF */
   --color-base-200: oklch(98.15% 0.003 256.3);  /* #F9FAFB */
+
+  --font-logo: "Poppins", sans-serif;
 }

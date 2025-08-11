@@ -1,0 +1,47 @@
+
+[
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "domain": "netflix.com",
+      "category": "Entretenimento"
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify",
+      "domain": "spotify.com",
+      "category": "Entretenimento"
+    },
+    {
+      "id": "disneyplus",
+      "name": "Disney+",
+      "domain": "disneyplus.com",
+      "category": "Entretenimento"
+    },
+    {
+      "id": "hbo",
+      "name": "HBO Max",
+      "domain": "hbomax.com",
+      "category": "Entretenimento"
+    },
+    {
+      "id": "adobe",
+      "name": "Adobe Creative Cloud",
+      "domain": "adobe.com",
+      "category": "Trabalho"
+    },
+    {
+      "id": "icloud",
+      "name": "iCloud",
+      "domain": "apple.com",
+      "category": "Trabalho"
+    },
+    {
+      "id": "gympass",
+      "name": "Gympass",
+      "domain": "gympass.com",
+      "category": "Fitness"
+    }
+  ]
+  
+  

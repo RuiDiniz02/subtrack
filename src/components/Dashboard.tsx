@@ -3,139 +3,155 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, db } from '@/contexts/AuthContext';
+import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { db } from '@/lib/firebase';
 import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, setLogLevel } from 'firebase/firestore';
 import type { Subscription } from '@/lib/types';
 
 import Header from './Header';
-import BottomNavbar from './BottomNavbar';
+import BottomNavBar from './BottomNavbar'; // Corrigido
 import StatCard from './StatCard';
 import SubscriptionItem from './SubscriptionItem';
 import SubscriptionModal from './SubscriptionModal';
 import CategoryChart from './CategoryChart';
-import { PlusCircleIcon } from './Icons';
 
 export default function Dashboard() {
-    const { user, loading } = useAuth();
+    const { user, loading: carregandoAuth } = useAuth();
     const router = useRouter();
-    const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+    const [assinaturas, setAssinaturas] = useState<Subscription[]>([]);
+    const [modalAberto, setModalAberto] = useState(false);
+    const [assinaturaEmEdicao, setAssinaturaEmEdicao] = useState<Subscription | null>(null);
     
     const appId = 'subtrack-app-9425a';
 
     useEffect(() => {
-        if (!loading && !user) {
+        if (!carregandoAuth && !user) {
             router.push('/login');
         }
-    }, [user, loading, router]);
+    }, [user, carregandoAuth, router]);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !db) return;
         setLogLevel('debug');
         const q = query(collection(db, `artifacts/${appId}/users/${user.uid}/subscriptions`));
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const subsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subscription));
-            setSubscriptions(subsData);
-        }, (error) => console.error("Erro ao carregar:", error));
+            const dadosAssinaturas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subscription));
+            setAssinaturas(dadosAssinaturas);
+        }, (error) => console.error("Erro ao carregar assinaturas:", error));
         return () => unsubscribe();
     }, [user, appId]);
 
-    const sortedSubscriptions = useMemo(() => {
-        return [...subscriptions].sort((a, b) => new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime());
-    }, [subscriptions]);
+    const assinaturasOrdenadas = useMemo(() => {
+        return [...assinaturas].sort((a, b) => new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime());
+    }, [assinaturas]);
 
-    const { dashboardStats, categoryData } = useMemo(() => {
-        const monthlyCosts: { [key: string]: number } = {};
-        let totalAnnual = 0;
+    const { estatisticasPainel, dadosCategoria } = useMemo(() => {
+        const custosMensais: { [key: string]: number } = {};
+        let totalAnual = 0;
 
-        subscriptions.forEach(sub => {
-            const monthlyPrice = sub.billingCycle === 'yearly' ? sub.price / 12 : sub.price;
-            totalAnnual += monthlyPrice * 12;
-            const category = sub.category || 'Sem Categoria';
-            if (!monthlyCosts[category]) monthlyCosts[category] = 0;
-            monthlyCosts[category] += monthlyPrice;
+        assinaturas.forEach(sub => {
+            const precoMensal = sub.billingCycle === 'yearly' ? sub.price / 12 : sub.price;
+            totalAnual += precoMensal * 12;
+            const categoria = sub.category || 'Uncategorized';
+            if (!custosMensais[categoria]) custosMensais[categoria] = 0;
+            custosMensais[categoria] += precoMensal;
         });
 
         return {
-            dashboardStats: {
-                count: subscriptions.length,
-                monthly: (totalAnnual / 12).toFixed(2),
-                yearly: totalAnnual.toFixed(2),
+            estatisticasPainel: {
+                count: assinaturas.length,
+                monthly: (totalAnual / 12).toFixed(2),
+                yearly: totalAnual.toFixed(2),
             },
-            categoryData: Object.keys(monthlyCosts).map(cat => ({ name: cat, value: parseFloat(monthlyCosts[cat].toFixed(2)) })),
+            dadosCategoria: Object.keys(custosMensais).map(cat => ({ name: cat, value: parseFloat(custosMensais[cat].toFixed(2)) })),
         };
-    }, [subscriptions]);
+    }, [assinaturas]);
 
-    const handleAddClick = () => {
-        setEditingSubscription(null);
-        setIsModalOpen(true);
+    const tratarCliqueAdicionar = () => {
+        setAssinaturaEmEdicao(null);
+        setModalAberto(true);
     };
 
-    const handleEditClick = (subscription: Subscription) => {
-        setEditingSubscription(subscription);
-        setIsModalOpen(true);
+    const tratarCliqueEditar = (assinatura: Subscription) => {
+        setAssinaturaEmEdicao(assinatura);
+        setModalAberto(true);
     };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setEditingSubscription(null);
+    const tratarFecharModal = () => {
+        setModalAberto(false);
+        setAssinaturaEmEdicao(null);
     };
 
-    const handleSaveSubscription = async (data: Omit<Subscription, 'id'>) => {
-        if (!user) return;
-        const path = `artifacts/${appId}/users/${user.uid}/subscriptions`;
-        if (editingSubscription) {
-            await updateDoc(doc(db, path, editingSubscription.id), data);
+    const tratarGuardarAssinatura = async (dados: Omit<Subscription, 'id'>) => {
+        if (!user || !db) return;
+        const caminho = `artifacts/${appId}/users/${user.uid}/subscriptions`;
+        if (assinaturaEmEdicao) {
+            await updateDoc(doc(db, caminho, assinaturaEmEdicao.id), dados);
         } else {
-            await addDoc(collection(db, path), data);
+            await addDoc(collection(db, caminho), dados);
         }
-        handleCloseModal();
+        tratarFecharModal();
     };
 
-    const deleteSubscription = async (id: string) => {
-        if (!user) return;
+    const apagarAssinatura = async (id: string) => {
+        if (!user || !db) return;
         await deleteDoc(doc(db, `artifacts/${appId}/users/${user.uid}/subscriptions/${id}`));
     };
 
-    if (loading || !user) {
-        return <div className="flex items-center justify-center h-screen bg-base-200 text-text-main">A verificar autenticação...</div>;
+    if (carregandoAuth || !user) {
+        return <div className="flex items-center justify-center h-screen bg-base-200 text-text-main">Verifying authentication...</div>;
     }
+
+    const containerVariants = {
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.1
+        }
+      }
+    };
 
     return (
         <div className="bg-base-200 text-text-main min-h-screen pb-24">
             <Header />
-            <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <StatCard title="Custo Mensal Estimado" value={`€${dashboardStats.monthly}`} />
-                    <StatCard title="Custo Anual Total" value={`€${dashboardStats.yearly}`} />
-                    <StatCard title="Nº de Subscrições" value={String(dashboardStats.count)} />
-                </div>
+            <motion.div 
+              className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8"
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+            >
+                <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" variants={containerVariants}>
+                    <StatCard title="Estimated Monthly Cost" value={`€${estatisticasPainel.monthly}`} />
+                    <StatCard title="Total Yearly Cost" value={`€${estatisticasPainel.yearly}`} />
+                    <StatCard title="Total Subscriptions" value={String(estatisticasPainel.count)} />
+                </motion.div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                    <div className="lg:col-span-3 bg-base-100 rounded-lg shadow-md p-4 sm:p-6">
-                        <h2 className="text-xl font-semibold mb-4 text-text-main">Próximas Renovações</h2>
+                <motion.div className="grid grid-cols-1 lg:grid-cols-5 gap-6" variants={containerVariants}>
+                    <motion.div className="lg:col-span-3 bg-base-100 rounded-lg shadow-md p-4 sm:p-6" variants={containerVariants}>
+                        <h2 className="text-xl font-semibold mb-4 text-text-main">Upcoming Renewals</h2>
                         <div className="space-y-3">
-                            {sortedSubscriptions.length > 0 ? (
-                                sortedSubscriptions.map(sub => (
-                                    <SubscriptionItem key={sub.id} subscription={sub} onEdit={() => handleEditClick(sub)} onDelete={() => deleteSubscription(sub.id)} />
+                            {assinaturasOrdenadas.length > 0 ? (
+                                assinaturasOrdenadas.map(sub => (
+                                    <SubscriptionItem key={sub.id} subscription={sub} onEdit={() => tratarCliqueEditar(sub)} onDelete={() => apagarAssinatura(sub.id)} />
                                 ))
                             ) : (
-                                <p className="text-text-light text-center py-8">Ainda não tem subscrições para mostrar.</p>
+                                <p className="text-text-light text-center py-8">You don't have any subscriptions yet.</p>
                             )}
                         </div>
-                    </div>
-                    <div className="lg:col-span-2 bg-base-100 rounded-lg shadow-md p-4 sm:p-6">
-                         <h2 className="text-xl font-semibold mb-4 text-text-main">Despesas por Categoria</h2>
-                         <CategoryChart data={categoryData} />
-                    </div>
-                </div>
-            </div>
+                    </motion.div>
+                    <motion.div className="lg:col-span-2 bg-base-100 rounded-lg shadow-md p-4 sm:p-6" variants={containerVariants}>
+                         <h2 className="text-xl font-semibold mb-4 text-text-main">Expenses by Category</h2>
+                         <CategoryChart data={dadosCategoria} />
+                    </motion.div>
+                </motion.div>
+            </motion.div>
             
-            <BottomNavbar onAddClick={handleAddClick} />
+            <BottomNavBar onAddClick={tratarCliqueAdicionar} />
 
-            {isModalOpen && (
-                <SubscriptionModal onClose={handleCloseModal} onSave={handleSaveSubscription} initialData={editingSubscription} />
+            {modalAberto && (
+                <SubscriptionModal onClose={tratarFecharModal} onSave={tratarGuardarAssinatura} initialData={assinaturaEmEdicao} />
             )}
         </div>
     );

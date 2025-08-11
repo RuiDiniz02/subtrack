@@ -1,18 +1,33 @@
-import type { NextConfig } from 'next';
-// O 'next-pwa' pode não ter tipos oficiais, por isso usamos 'any' para simplificar
-// ou pode instalar @types/next-pwa se existir
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: process.env.NODE_ENV === 'development'
 });
 
-const nextConfig: NextConfig = {
-  turbopack: {
-    // ...
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'logo.clearbit.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com', // Domínio adicionado
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
-  // ... as suas outras configurações do Next.js, se tiver alguma, entram aqui
 };
 
-export default withPWA(nextConfig);
+module.exports = withPWA(nextConfig);
