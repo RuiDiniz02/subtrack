@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-// import { motion } from 'framer-motion'; // Removido porque não é usado diretamente aqui
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, setLogLevel } from 'firebase/firestore';
