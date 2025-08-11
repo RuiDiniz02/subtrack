@@ -1,7 +1,7 @@
 'use client';
 
 import Header from "@/components/Header";
-import BottomNavbar from "@/components/BottomNavbar"; // Corrigido
+import BottomNavbar from "@/components/BottomNavbar";
 import Profile from "@/components/Profile";
 import { useRouter } from "next/navigation";
 
@@ -22,4 +22,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-

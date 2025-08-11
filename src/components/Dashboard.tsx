@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion'; // Removido porque não é usado diretamente aqui
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, setLogLevel } from 'firebase/firestore';
@@ -118,8 +118,8 @@ export default function Dashboard() {
                             ))
                         ) : (
                             <div className="bg-base-200 rounded-lg p-8 text-center text-text-light">
-                                <p>You don't have any subscriptions yet.</p>
-                                <p className="text-sm mt-2">Click the '+' button to add your first one!</p>
+                                <p>You don&apos;t have any subscriptions yet.</p>
+                                <p className="text-sm mt-2">Click the &apos;+&apos; button to add your first one!</p>
                             </div>
                         )}
                     </div>
@@ -143,4 +143,3 @@ export default function Dashboard() {
         </div>
     );
 }
-

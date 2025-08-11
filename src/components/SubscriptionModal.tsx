@@ -44,24 +44,25 @@ export default function SubscriptionModal({ onClose, onSave, initialData }: Subs
         }
     }, [initialData]);
 
-    const searchServices = (queryText: string) => {
-        if (queryText.length < 2) {
-            setSearchResults([]);
-            return;
-        }
-        const results = servicesData.filter(service =>
-            service.name.toLowerCase().includes(queryText.toLowerCase())
-        ).slice(0, 5);
-        setSearchResults(results as Service[]);
-    };
-
-    const debouncedSearch = useCallback(debounce(searchServices, 200), []);
+    const debouncedSearch = useCallback(
+        debounce((queryText: string) => {
+            if (queryText.length < 2) {
+                setSearchResults([]);
+                return;
+            }
+            const results = servicesData.filter(service =>
+                service.name.toLowerCase().includes(queryText.toLowerCase())
+            ).slice(0, 5);
+            setSearchResults(results as Service[]);
+        }, 200),
+        [] // As dependências estão vazias porque a função não depende de props ou estado externo
+    );
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setSearchQuery(query);
         setName(query);
-        setLogoUrl(undefined); // CORREÇÃO: Limpa o logo se o utilizador escrever manualmente
+        setLogoUrl(undefined);
         debouncedSearch(query);
     };
 
@@ -84,7 +85,6 @@ export default function SubscriptionModal({ onClose, onSave, initialData }: Subs
             nextBillingDate,
             category,
             startDate: initialData?.startDate || new Date().toISOString(),
-            // CORREÇÃO: Apenas inclui o logoUrl se ele existir
             ...(logoUrl && { logoUrl }),
         };
         
