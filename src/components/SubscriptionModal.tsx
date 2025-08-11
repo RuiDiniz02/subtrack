@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -9,7 +8,7 @@ import Image from 'next/image';
 import { debounce } from 'lodash';
 import servicesData from '@/lib/services.json';
 
-const categories = ["Entretenimento", "Trabalho", "Educação", "Fitness", "Outro"];
+const categories = ["Entertainment", "Work", "Education", "Fitness", "Other"];
 
 interface SubscriptionModalProps {
     onClose: () => void;
@@ -97,10 +96,10 @@ export default function SubscriptionModal({ onClose, onSave, initialData }: Subs
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
             <div className="bg-base-100 rounded-lg shadow-2xl p-6 w-full max-w-md relative" onClick={e => e.stopPropagation()}>
                 <button onClick={onClose} className="absolute top-3 right-3 text-text-light hover:text-text-main cursor-pointer"><XIcon /></button>
-                <h2 className="text-2xl font-bold mb-6 text-text-main">{isEditing ? 'Editar Subscrição' : 'Nova Subscrição'}</h2>
+                <h2 className="text-2xl font-bold mb-6 text-text-main">{isEditing ? 'Edit Subscription' : 'New Subscription'}</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="relative">
-                        <input type="text" value={searchQuery} onChange={handleSearchChange} className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary" required placeholder="Pesquisar serviço (ex: Spotify)" />
+                        <input type="text" value={searchQuery} onChange={handleSearchChange} className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary" required placeholder="Search for a service (e.g., Spotify)" />
                         {searchResults.length > 0 && (
                             <ul className="absolute z-10 w-full bg-base-100 border border-secondary rounded-lg mt-1 shadow-lg max-h-48 overflow-y-auto">
                                 {searchResults.map(service => (
@@ -114,21 +113,21 @@ export default function SubscriptionModal({ onClose, onSave, initialData }: Subs
                             </ul>
                         )}
                     </div>
-                    <input type="number" value={price} onChange={e => setPrice(e.target.value)} className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary" min="0" step="0.01" required placeholder="Preço (€)" />
+                    <input type="number" value={price} onChange={e => setPrice(e.target.value)} className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary" min="0" step="0.01" required placeholder="Price (€)" />
                     <select value={billingCycle} onChange={e => setBillingCycle(e.target.value as 'monthly' | 'yearly')} className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary">
-                        <option value="monthly">Mensal</option>
-                        <option value="yearly">Anual</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
                     </select>
                     <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary">
                         {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
                     <div>
-                        <label htmlFor="nextBillingDate" className="block text-sm font-medium text-text-light mb-1">Próximo Pagamento</label>
+                        <label htmlFor="nextBillingDate" className="block text-sm font-medium text-text-light mb-1">Next Payment</label>
                         <input type="date" id="nextBillingDate" value={nextBillingDate} onChange={e => setNextBillingDate(e.target.value)} className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary" required />
                     </div>
                     <div className="flex justify-end gap-4 pt-4">
-                        <button type="button" onClick={onClose} className="py-2 px-4 bg-secondary hover:bg-secondary/80 rounded-lg font-semibold transition-colors text-text-light cursor-pointer">Cancelar</button>
-                        <button type="submit" className="py-2 px-4 bg-action hover:opacity-90 rounded-lg font-bold text-white transition-colors cursor-pointer">{isEditing ? 'Guardar Alterações' : 'Adicionar'}</button>
+                        <button type="button" onClick={onClose} className="py-2 px-4 bg-secondary hover:bg-secondary/80 rounded-lg font-semibold transition-colors text-text-light cursor-pointer">Cancel</button>
+                        <button type="submit" className="py-2 px-4 bg-action hover:opacity-90 rounded-lg font-bold text-white transition-colors cursor-pointer">{isEditing ? 'Save Changes' : 'Add Subscription'}</button>
                     </div>
                 </form>
             </div>

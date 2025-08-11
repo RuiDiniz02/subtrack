@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -41,7 +40,7 @@ export default function LandingPage() {
             </p>
             <div className="mt-8 flex gap-4">
               <Link href="/login" className="bg-primary text-white font-bold py-3 px-8 rounded-lg text-lg hover:opacity-90 transition-opacity cursor-pointer">
-                Let's begin
+                Let&apos;s begin
               </Link>
             </div>
           </motion.div>

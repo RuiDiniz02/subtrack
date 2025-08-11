@@ -1,10 +1,14 @@
-
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { AuthProvider } from "@/contexts/AuthContext"; // Importar
+import { Inter, Poppins } from "next/font/google"; // Importar Poppins
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
+const poppins = Poppins({ 
+  subsets: ["latin"], 
+  weight: ['700'],
+  variable: '--font-poppins' // Definir como variável CSS
+});
 
 export const metadata: Metadata = {
   title: "Subtrack",
@@ -22,11 +26,9 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192x192.png"></link>
         <meta name="theme-color" content="#4F46E5" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet" />
       </head>
-      <body className={inter.className}>
+      {/* Aplicar as fontes ao body */}
+      <body className={`${inter.variable} ${poppins.variable} font-sans`}>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

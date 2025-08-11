@@ -1,15 +1,14 @@
-
 @import "tailwindcss";
 
 @theme {
-  --color-primary: oklch(54.49% 0.17 265.49);   /* #4F46E5 */
-  --color-secondary: oklch(95.81% 0.005 256.3);  /* #F3F4F6 */
-  --color-text-main: oklch(14.7% 0.01 259.3);    /* #111827 */
-  --color-text-light: oklch(53.94% 0.01 254.3);  /* #6B7280 */
-  --color-action: oklch(67.75% 0.14 163.5);     /* #10B981 */
-  --color-error: oklch(64.2% 0.19 25.4);        /* #EF4444 */
-  --color-base-100: oklch(100% 0 0);            /* #FFFFFF */
-  --color-base-200: oklch(98.15% 0.003 256.3);  /* #F9FAFB */
+  --color-primary: oklch(54.49% 0.17 265.49);
+  --color-secondary: oklch(95.81% 0.005 256.3);
+  --color-text-main: oklch(14.7% 0.01 259.3);
+  --color-text-light: oklch(53.94% 0.01 254.3);
+  --color-action: oklch(67.75% 0.14 163.5);
+  --color-error: oklch(64.2% 0.19 25.4);
+  --color-base-100: oklch(100% 0 0);
+  --color-base-200: oklch(98.15% 0.003 256.3);
 
-  --font-logo: "Poppins", sans-serif;
+  --font-logo: var(--font-poppins), sans-serif;
 }
