@@ -1,4 +1,3 @@
-
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -12,7 +11,6 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Esta verificação é crucial para diagnosticar problemas com o .env.local
 if (!firebaseConfig.apiKey) {
     throw new Error("A configuração do Firebase está em falta. Verifique o .env.local e reinicie o servidor.");
 }
@@ -22,3 +20,4 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 export { app, auth, db };
+

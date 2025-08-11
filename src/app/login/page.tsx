@@ -1,7 +1,8 @@
 'use client';
 
-import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth'; // Alterado
-import { auth, useAuth } from '@/contexts/AuthContext';
+import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -18,7 +19,7 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithRedirect(auth, provider); // Alterado
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       console.error("Erro ao fazer login com o Google:", error);
     }
@@ -43,4 +44,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

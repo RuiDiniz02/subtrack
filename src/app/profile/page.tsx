@@ -1,8 +1,7 @@
-
 'use client';
 
 import Header from "@/components/Header";
-import BottomNavBar from "@/components/BottomNavbar"; // Corrigido
+import BottomNavbar from "@/components/BottomNavbar"; // Corrigido
 import Profile from "@/components/Profile";
 import { useRouter } from "next/navigation";
 
@@ -19,7 +18,8 @@ export default function ProfilePage() {
       <main className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
         <Profile />
       </main>
-      <BottomNavBar onAddClick={handleAddClick} />
+      <BottomNavbar onAddClick={handleAddClick} />
     </div>
   );
 }
+

@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, User, signOut as firebaseSignOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase'; // Importar a partir do novo ficheiro
+import { auth } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
