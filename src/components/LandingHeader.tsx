@@ -14,7 +14,7 @@ export default function LandingHeader() {
           <Link href="/login" className="text-text-light font-semibold hover:text-primary transition-colors">
             Login
           </Link>
-          <Link href="/login" className="bg-primary text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition-opacity">
+          <Link href="/signup" className="bg-primary text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition-opacity">
             Sign Up
           </Link>
         </nav>

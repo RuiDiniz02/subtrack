@@ -5,6 +5,7 @@ const withPWA = require('next-pwa')({
   disable: process.env.NODE_ENV === 'development'
 });
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -22,11 +23,25 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'lh3.googleusercontent.com', // Domínio adicionado
+        hostname: 'lh3.googleusercontent.com',
         port: '',
         pathname: '/**',
       },
     ],
+  },
+  // Adicionar esta secção para configurar os cabeçalhos de segurança
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://*.firebaseapp.com;",
+          },
+        ],
+      },
+    ];
   },
 };
 

@@ -7,13 +7,18 @@ export interface Subscription {
     startDate: string;
     nextBillingDate: string;
     category: string;
-    logoUrl?: string; // Opcional: para guardar o URL do logotipo
+    logoUrl?: string;
 }
 
-// Nova interface para a nossa base de dados de serviços
 export interface Service {
     id: string;
     name: string;
     domain: string;
     category: string;
+}
+
+// Nova interface para o perfil completo do utilizador
+export interface UserProfile {
+    currency: 'EUR' | 'USD' | 'GBP';
+    plan: 'free' | 'pro';
 }

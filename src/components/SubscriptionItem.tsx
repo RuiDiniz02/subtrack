@@ -1,10 +1,16 @@
 
 'use client';
 
-import type { Subscription } from '@/lib/types';
+import type { Subscription, UserSettings } from '@/lib/types';
 import { CalendarIcon, EditIcon, Trash2Icon } from './Icons';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+
+const currencySymbols = {
+    EUR: '€',
+    USD: '$',
+    GBP: '£',
+};
 
 const formatDate = (dateString: string) => {
     if (!dateString) return '';
@@ -19,8 +25,9 @@ interface SubscriptionItemProps {
     subscription: Subscription;
     onEdit: () => void;
     onDelete: () => void;
+    currency: UserSettings['currency'];
 }
-export default function SubscriptionItem({ subscription, onEdit, onDelete }: SubscriptionItemProps) {
+export default function SubscriptionItem({ subscription, onEdit, onDelete, currency }: SubscriptionItemProps) {
     return (
         <motion.div 
           className="flex items-center justify-between p-4 border-b border-secondary hover:bg-base-200 transition-colors"
@@ -50,7 +57,7 @@ export default function SubscriptionItem({ subscription, onEdit, onDelete }: Sub
                 </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-                <p className="text-lg font-semibold text-text-main">€{subscription.price.toFixed(2)}</p>
+                <p className="text-lg font-semibold text-text-main">{currencySymbols[currency]}{subscription.price.toFixed(2)}</p>
                 <button onClick={onEdit} className="text-text-light hover:text-primary transition-colors p-2 rounded-full cursor-pointer" aria-label={`Editar ${subscription.name}`}>
                     <EditIcon />
                 </button>

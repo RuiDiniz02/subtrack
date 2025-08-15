@@ -4,10 +4,18 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeftIcon, ChevronRightIcon } from './Icons';
+import type { UserSettings } from '@/lib/types';
+
+const currencySymbols = {
+    EUR: '€',
+    USD: '$',
+    GBP: '£',
+};
 
 interface StatsCarouselProps {
   monthly: string;
   yearly: string;
+  currency: UserSettings['currency'];
 }
 
 const variants = {
@@ -27,7 +35,7 @@ const variants = {
   }),
 };
 
-export default function StatsCarousel({ monthly, yearly }: StatsCarouselProps) {
+export default function StatsCarousel({ monthly, yearly, currency }: StatsCarouselProps) {
   const [[page, direction], setPage] = useState([0, 0]);
   const stats = [
     { title: 'Estimated Monthly Cost', value: monthly },
@@ -58,7 +66,7 @@ export default function StatsCarousel({ monthly, yearly }: StatsCarouselProps) {
           className="absolute flex flex-col items-center justify-center"
         >
           <h3 className="text-text-light text-sm font-medium uppercase tracking-wider">{currentStat.title}</h3>
-          <p className="text-5xl font-bold text-primary mt-2">€{currentStat.value}</p>
+          <p className="text-5xl font-bold text-primary mt-2">{currencySymbols[currency]}{currentStat.value}</p>
         </motion.div>
       </AnimatePresence>
       <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2">

@@ -2,65 +2,78 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, User, signOut as firebaseSignOut } from 'firebase/auth';
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getFirestore, Firestore } from 'firebase/firestore';
-
-// Configuração do Firebase a partir de variáveis de ambiente
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
-};
-
-// Exportações para serem usadas noutros ficheiros
-export let auth: any;
-export let db: any;
+import { onAuthStateChanged, User, signOut as firebaseSignOut } from 'firebase/auth';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import type { UserProfile } from '@/lib/types';
 
 interface AuthContextType {
   user: User | null;
+  profile: UserProfile | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  updateProfile: (newProfile: Partial<UserProfile>) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true, signOut: async () => {} });
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  profile: null,
+  loading: true,
+  signOut: async () => {},
+  updateProfile: async () => {},
+});
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Esta verificação garante que as variáveis de ambiente foram carregadas.
-    if (!firebaseConfig.apiKey) {
-        console.error("A configuração do Firebase está em falta. Verifique o .env.local e reinicie o servidor.");
-        setLoading(false); // Para o ecrã de "a carregar"
-        return;
-    }
-
-    const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-    auth = getAuth(app);
-    db = getFirestore(app);
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      if (!firebaseUser) {
+        setProfile(null);
+        setLoading(false);
+      }
     });
-
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      const profileDocRef = doc(db, `users/${user.uid}`);
+      const unsubscribe = onSnapshot(profileDocRef, (docSnap) => {
+        if (docSnap.exists() && docSnap.data().plan) {
+          setProfile(docSnap.data() as UserProfile);
+        } else {
+          // Cria um perfil padrão para novos utilizadores
+          const defaultProfile: UserProfile = { currency: 'EUR', plan: 'free' };
+          setDoc(profileDocRef, defaultProfile, { merge: true });
+          setProfile(defaultProfile);
+        }
+        setLoading(false);
+      });
+      return () => unsubscribe();
+    }
+  }, [user]);
 
   const signOut = async () => {
     await firebaseSignOut(auth);
   };
 
+  const updateProfile = async (newProfile: Partial<UserProfile>) => {
+    if (user) {
+        const profileDocRef = doc(db, `users/${user.uid}`);
+        await setDoc(profileDocRef, newProfile, { merge: true });
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, signOut, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
+

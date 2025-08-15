@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, setLogLevel } from 'firebase/firestore';
 import type { Subscription } from '@/lib/types';
@@ -17,36 +18,12 @@ import CategoryChart from './CategoryChart';
 
 export default function Dashboard() {
     const { user, loading: carregandoAuth } = useAuth();
+    const { settings, loading: carregandoSettings } = useSettings();
     const router = useRouter();
     const [assinaturas, setAssinaturas] = useState<Subscription[]>([]);
     const [modalAberto, setModalAberto] = useState(false);
     const [assinaturaEmEdicao, setAssinaturaEmEdicao] = useState<Subscription | null>(null);
     
-    const appId = 'subtrack-app-9425a';
-
-    useEffect(() => {
-        if (!carregandoAuth && !user) {
-            router.push('/login');
-        }
-    }, [user, carregandoAuth, router]);
-
-    useEffect(() => {
-        if (!user || !db) {
-            return;
-        }
-        setLogLevel('debug');
-        const q = query(collection(db, `artifacts/${appId}/users/${user.uid}/subscriptions`));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const dadosAssinaturas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subscription));
-            setAssinaturas(dadosAssinaturas);
-        }, (error) => console.error("Erro ao carregar assinaturas:", error));
-        return () => unsubscribe();
-    }, [user]);
-
-    const assinaturasOrdenadas = useMemo(() => {
-        return [...assinaturas].sort((a, b) => new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime());
-    }, [assinaturas]);
-
     const { estatisticasPainel, dadosCategoria } = useMemo(() => {
         const custosMensais: { [key: string]: number } = {};
         let totalAnual = 0;
@@ -68,6 +45,10 @@ export default function Dashboard() {
         };
     }, [assinaturas]);
 
+    const assinaturasOrdenadas = useMemo(() => {
+        return [...assinaturas].sort((a, b) => new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime());
+    }, [assinaturas]);
+
     const tratarCliqueAdicionar = () => {
         setAssinaturaEmEdicao(null);
         setModalAberto(true);
@@ -85,7 +66,7 @@ export default function Dashboard() {
 
     const tratarGuardarAssinatura = async (dados: Omit<Subscription, 'id'>) => {
         if (!user || !db) return;
-        const caminho = `artifacts/${appId}/users/${user.uid}/subscriptions`;
+        const caminho = `users/${user.uid}/subscriptions`;
         if (assinaturaEmEdicao) {
             await updateDoc(doc(db, caminho, assinaturaEmEdicao.id), dados);
         } else {
@@ -96,10 +77,12 @@ export default function Dashboard() {
 
     const apagarAssinatura = async (id: string) => {
         if (!user || !db) return;
-        await deleteDoc(doc(db, `artifacts/${appId}/users/${user.uid}/subscriptions/${id}`));
+        await deleteDoc(doc(db, `users/${user.uid}/subscriptions/${id}`));
     };
 
-    if (carregandoAuth || !user) {
+    const loading = carregandoAuth || carregandoSettings;
+
+    if (loading || !user) {
         return <div className="flex items-center justify-center h-screen bg-base-200 text-text-main">Verifying authentication...</div>;
     }
     
@@ -107,14 +90,14 @@ export default function Dashboard() {
         <div className="bg-base-100 text-text-main min-h-screen pb-24">
             <Header />
             <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
-                <StatsCarousel monthly={estatisticasPainel.monthly} yearly={estatisticasPainel.yearly} />
+                <StatsCarousel monthly={estatisticasPainel.monthly} yearly={estatisticasPainel.yearly} currency={settings.currency} />
 
                 <div className="mt-8">
                     <h2 className="text-xl font-semibold mb-4 text-text-main">Upcoming Renewals</h2>
                     <div className="space-y-0">
                         {assinaturasOrdenadas.length > 0 ? (
                             assinaturasOrdenadas.map(sub => (
-                                <SubscriptionItem key={sub.id} subscription={sub} onEdit={() => tratarCliqueEditar(sub)} onDelete={() => apagarAssinatura(sub.id)} />
+                                <SubscriptionItem key={sub.id} subscription={sub} onEdit={() => tratarCliqueEditar(sub)} onDelete={() => apagarAssinatura(sub.id)} currency={settings.currency} />
                             ))
                         ) : (
                             <div className="bg-base-200 rounded-lg p-8 text-center text-text-light">
@@ -129,7 +112,7 @@ export default function Dashboard() {
                     <div className="mt-8">
                         <h2 className="text-xl font-semibold mb-4 text-text-main">Expenses by Category</h2>
                         <div className="bg-base-100 rounded-lg p-4 sm:p-6">
-                            <CategoryChart data={dadosCategoria} />
+                            <CategoryChart data={dadosCategoria} currency={settings.currency} />
                         </div>
                     </div>
                 )}
@@ -138,7 +121,7 @@ export default function Dashboard() {
             <BottomNavbar onAddClick={tratarCliqueAdicionar} />
 
             {modalAberto && (
-                <SubscriptionModal onClose={tratarFecharModal} onSave={tratarGuardarAssinatura} initialData={assinaturaEmEdicao} />
+                <SubscriptionModal onClose={tratarFecharModal} onSave={tratarGuardarAssinatura} initialData={assinaturaEmEdicao} currency={settings.currency} />
             )}
         </div>
     );
