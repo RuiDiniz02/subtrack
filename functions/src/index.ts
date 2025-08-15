@@ -5,11 +5,12 @@ import Stripe from "stripe";
 admin.initializeApp();
 const db = admin.firestore();
 
+// A sua chave secreta do Stripe deve estar nas variáveis de ambiente do Firebase
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
+  apiVersion: "2025-07-30.basil",
 });
 
-export const createStripeCheckout = functions.https.onCall(async (data, context) => { // O tipo explícito foi removido para usar a inferência do TypeScript
+export const createStripeCheckout = functions.https.onCall(async (data, context: functions.https.CallableContext) => {
   if (!context.auth) {
     throw new functions.https.HttpsError(
       "unauthenticated",
@@ -17,8 +18,8 @@ export const createStripeCheckout = functions.https.onCall(async (data, context)
     );
   }
 
-  // SUBSTITUA ESTE ID pelo ID do preço que criou no seu painel do Stripe
-  const priceId = "price_SEU_ID_DE_PRECO_AQUI";
+  // IMPORTANTE: Substitua este ID pelo Price ID que criou no seu Stripe Dashboard
+  const priceId = "price_1Rw269LK5hWMG2KsKdOctG25"; 
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
@@ -43,11 +44,11 @@ export const createStripeCheckout = functions.https.onCall(async (data, context)
 });
 
 
-// NOVA CLOUD FUNCTION: Webhook para ouvir os eventos do Stripe
+// Webhook para ouvir os eventos do Stripe
 export const stripeWebhook = functions.https.onRequest(async (req, res) => {
     const signature = req.headers["stripe-signature"] as string;
     
-    // É crucial ter uma chave secreta para o webhook para garantir que os pedidos vêm do Stripe
+    // A sua chave secreta do webhook deve estar nas variáveis de ambiente
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
     let event: Stripe.Event;

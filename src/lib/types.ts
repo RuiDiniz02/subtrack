@@ -1,4 +1,3 @@
-
 export interface Subscription {
     id: string;
     name: string;
@@ -17,8 +16,11 @@ export interface Service {
     category: string;
 }
 
-// Nova interface para o perfil completo do utilizador
+// Interface para o perfil completo do utilizador
 export interface UserProfile {
     currency: 'EUR' | 'USD' | 'GBP';
     plan: 'free' | 'pro';
 }
+
+// Adicionado para corrigir os erros de importação
+export type UserSettings = UserProfile;

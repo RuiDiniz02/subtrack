@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +6,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 export default function SignUpPage() {
-  const { user, loading, SignUpWithEmail } = useAuth();
+  const { user, loading, signUpWithEmail } = useAuth(); // Corrigido aqui
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +22,7 @@ export default function SignUpPage() {
     e.preventDefault();
     setError('');
     try {
-      await signUpWithEmail(email, password);
+      await signUpWithEmail(email, password); // Corrigido aqui
       router.push('/dashboard');
     } catch (err: any) {
       if (err.code === 'auth/email-already-in-use') {

@@ -1,8 +1,7 @@
-
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User, signOut as firebaseSignOut } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut as firebaseSignOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import type { UserProfile } from '@/lib/types';
@@ -13,6 +12,8 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   updateProfile: (newProfile: Partial<UserProfile>) => Promise<void>;
+  signInWithEmail: (email: string, pass: string) => Promise<any>;
+  signUpWithEmail: (email: string, pass: string) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,6 +22,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signOut: async () => {},
   updateProfile: async () => {},
+  signInWithEmail: async () => {},
+  signUpWithEmail: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -68,12 +71,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const signInWithEmail = (email: string, pass: string) => {
+    return signInWithEmailAndPassword(auth, email, pass);
+  }
+
+  const signUpWithEmail = (email: string, pass: string) => {
+    return createUserWithEmailAndPassword(auth, email, pass);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signOut, updateProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, signOut, updateProfile, signInWithEmail, signUpWithEmail }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
-

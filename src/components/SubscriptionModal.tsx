@@ -1,9 +1,8 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import type { Subscription, Service } from '@/lib/types';
+import type { Subscription, Service, UserProfile } from '@/lib/types';
 import { XIcon } from './Icons';
 import Image from 'next/image';
 import { debounce } from 'lodash';
@@ -15,8 +14,16 @@ interface SubscriptionModalProps {
     onClose: () => void;
     onSave: (data: Omit<Subscription, 'id'>) => void;
     initialData: Subscription | null;
+    currency: UserProfile['currency']; // Propriedade adicionada
 }
-export default function SubscriptionModal({ onClose, onSave, initialData }: SubscriptionModalProps) {
+
+const currencySymbols = {
+  EUR: '€',
+  USD: '$',
+  GBP: '£',
+};
+
+export default function SubscriptionModal({ onClose, onSave, initialData, currency }: SubscriptionModalProps) {
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
@@ -55,7 +62,7 @@ export default function SubscriptionModal({ onClose, onSave, initialData }: Subs
             ).slice(0, 5);
             setSearchResults(results as Service[]);
         }, 200),
-        [] // As dependências estão vazias porque a função não depende de props ou estado externo
+        []
     );
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,7 +121,7 @@ export default function SubscriptionModal({ onClose, onSave, initialData }: Subs
                             </ul>
                         )}
                     </div>
-                    <input type="number" value={price} onChange={e => setPrice(e.target.value)} className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary" min="0" step="0.01" required placeholder="Price (€)" />
+                    <input type="number" value={price} onChange={e => setPrice(e.target.value)} className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary" min="0" step="0.01" required placeholder={`Price (${currencySymbols[currency]})`} />
                     <select value={billingCycle} onChange={e => setBillingCycle(e.target.value as 'monthly' | 'yearly')} className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary">
                         <option value="monthly">Monthly</option>
                         <option value="yearly">Yearly</option>
