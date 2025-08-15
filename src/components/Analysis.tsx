@@ -46,7 +46,7 @@ export default function Analysis() {
         }
 
         const categorySpending: { [key: string]: number } = {};
-        let mostExpensiveSub: Subscription | null = null;
+        let mostExpensiveSub: Subscription | null = null as Subscription | null;
         let yearlySavings = 0;
 
         subscriptions.forEach(sub => {
@@ -86,6 +86,11 @@ export default function Analysis() {
     if (loading || !user) {
         return <div className="text-center p-10">Loading analysis...</div>;
     }
+    
+    // Verificação adicional para garantir que `profile` não é nulo antes de o usar
+    if (!profile) {
+        return <div className="text-center p-10">Loading profile...</div>;
+    }
 
     return (
         <motion.div 
@@ -104,9 +109,9 @@ export default function Analysis() {
                                 <AlertTriangleIcon className="text-error" />
                                 <h2 className="text-xl font-semibold text-text-main">Highest Expense</h2>
                             </div>
-                            <p className="text-text-light">Your most expensive subscription is <span className="font-bold text-text-main">{analysisData.mostExpensiveSub.name}</span>.</p>
+                            <p className="text-text-light">Your most expensive subscription is <span className="font-bold text-text-main">{analysisData.mostExpensiveSub?.name || 'N/A'}</span>.</p>
                             <p className="text-3xl font-bold text-error mt-2">{formatCurrency(analysisData.mostExpensiveSub.price, profile.currency)}
-                                <span className="text-base font-medium text-text-light">/{analysisData.mostExpensiveSub.billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
+                                <span className="text-base font-medium text-text-light">/{analysisData.mostExpensiveSub && analysisData.mostExpensiveSub.billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                             </p>
                         </div>
                     )}
