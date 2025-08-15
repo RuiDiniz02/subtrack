@@ -7,6 +7,7 @@ const withPWA = require('next-pwa')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // A sua configuração de imagens existente (mantida)
   images: {
     remotePatterns: [
       {
@@ -29,15 +30,17 @@ const nextConfig = {
       },
     ],
   },
-  // Adicionar esta secção para configurar os cabeçalhos de segurança
+  
+  // A nova configuração de headers (adicionada)
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/:path*',
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://*.firebaseapp.com;",
+            // CORREÇÃO: Adicionado https://js.stripe.com
+            value: "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://*.firebaseapp.com https://js.stripe.com;",
           },
         ],
       },

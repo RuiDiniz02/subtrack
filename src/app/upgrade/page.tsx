@@ -1,5 +1,3 @@
-// src/app/upgrade/page.tsx
-
 'use client';
 
 import Header from "@/components/Header";
@@ -14,7 +12,6 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-// Interface para a resposta da Cloud Function
 interface CheckoutResponse {
   id: string;
 }
@@ -26,7 +23,7 @@ export default function UpgradePage() {
 
   const handleUpgrade = async () => {
     if (!user) {
-      alert("Por favor, faça login para continuar.");
+      router.push('/login');
       return;
     }
 
@@ -35,7 +32,7 @@ export default function UpgradePage() {
     const createCheckout = httpsCallable(functions, 'createStripeCheckout');
     
     try {
-      // Tipar a resposta da função
+      // CORREÇÃO: Chamada simples, sem passar 'context'. O Firebase trata de tudo.
       const response = await createCheckout() as { data: CheckoutResponse };
       const sessionId = response.data.id;
 
