@@ -1,3 +1,4 @@
+// src/app/upgrade/page.tsx
 
 'use client';
 
@@ -7,12 +8,16 @@ import { useRouter } from "next/navigation";
 import { CheckCircleIcon } from "@/components/Icons";
 import { useState } from "react";
 import { httpsCallable } from 'firebase/functions';
-import { functions } from '@/lib/firebase'; // Importar do nosso ficheiro central
+import { functions } from '@/lib/firebase';
 import { loadStripe } from '@stripe/stripe-js';
 import { useAuth } from "@/contexts/AuthContext";
 
-// Carrega o Stripe com a sua chave publicável do .env.local
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
+// Interface para a resposta da Cloud Function
+interface CheckoutResponse {
+  id: string;
+}
 
 export default function UpgradePage() {
   const router = useRouter();
@@ -27,14 +32,13 @@ export default function UpgradePage() {
 
     setIsLoading(true);
     
-    // Chama a nossa Cloud Function
     const createCheckout = httpsCallable(functions, 'createStripeCheckout');
     
     try {
-      const response: any = await createCheckout();
+      // Tipar a resposta da função
+      const response = await createCheckout() as { data: CheckoutResponse };
       const sessionId = response.data.id;
 
-      // Redireciona para a página de pagamento do Stripe
       const stripe = await stripePromise;
       if (stripe) {
         await stripe.redirectToCheckout({ sessionId });

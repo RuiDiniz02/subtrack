@@ -1,12 +1,13 @@
+// src/components/Dashboard.tsx
 
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useMemo } from 'react';
+// import { useRouter } from 'next/navigation'; // Removido
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, setLogLevel } from 'firebase/firestore';
+import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore'; // Imports limpos
 import type { Subscription } from '@/lib/types';
 
 import Header from './Header';
@@ -19,8 +20,8 @@ import CategoryChart from './CategoryChart';
 export default function Dashboard() {
     const { user, loading: carregandoAuth } = useAuth();
     const { settings, loading: carregandoSettings } = useSettings();
-    const router = useRouter();
-    const [assinaturas, setAssinaturas] = useState<Subscription[]>([]);
+    // const router = useRouter(); // Removido
+    const [assinaturas] = useState<Subscription[]>([]); // setAssinaturas removido
     const [modalAberto, setModalAberto] = useState(false);
     const [assinaturaEmEdicao, setAssinaturaEmEdicao] = useState<Subscription | null>(null);
     
@@ -82,7 +83,7 @@ export default function Dashboard() {
 
     const loading = carregandoAuth || carregandoSettings;
 
-    if (loading || !user) {
+    if (loading || !user || !settings) {
         return <div className="flex items-center justify-center h-screen bg-base-200 text-text-main">Verifying authentication...</div>;
     }
     

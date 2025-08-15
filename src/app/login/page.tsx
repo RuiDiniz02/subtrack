@@ -1,12 +1,12 @@
+// src/app/login/page.tsx
 
 'use client';
 
-import { GoogleAuthProvider, signInWithRedirect, setPersistence, browserLocalPersistence } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { FirebaseError } from 'firebase/app';
 
 export default function LoginPage() {
   const { user, loading, signInWithEmail } = useAuth();
@@ -21,26 +21,29 @@ export default function LoginPage() {
     }
   }, [user, loading, router]);
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
       await signInWithEmail(email, password);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError('Failed to log in. Please check your credentials.');
-      console.error("Erro de login:", err.message);
+    } catch (err: unknown) {
+      if (err instanceof FirebaseError) {
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+          setError('Invalid email or password.');
+        } else {
+          setError('Failed to log in. Please try again.');
+        }
+      } else {
+         setError('An unexpected error occurred.');
+      }
+      console.error("Erro de login:", (err as Error).message);
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      await setPersistence(auth, browserLocalPersistence);
-      await signInWithRedirect(auth, provider);
-    } catch (error) {
-      console.error("Erro ao iniciar o login com o Google:", error);
-    }
+  // Placeholder para a função de login com Google
+  const handleGoogleSignIn = () => {
+    alert('Login com Google ainda não implementado.');
   };
 
   if (loading || user) {
@@ -57,7 +60,7 @@ export default function LoginPage() {
         </div>
         <h2 className="text-2xl font-bold text-text-main mb-6 text-center">Welcome Back</h2>
         
-        <form onSubmit={handleEmailSignIn} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary" />
           <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required className="w-full bg-base-200 border-secondary text-text-main rounded-lg p-3 focus:ring-2 focus:ring-primary" />
           {error && <p className="text-error text-sm">{error}</p>}

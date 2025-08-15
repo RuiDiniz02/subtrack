@@ -1,7 +1,9 @@
+// src/contexts/AuthContext.tsx
+
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User, signOut as firebaseSignOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut as firebaseSignOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, UserCredential } from 'firebase/auth';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import type { UserProfile } from '@/lib/types';
@@ -12,8 +14,8 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   updateProfile: (newProfile: Partial<UserProfile>) => Promise<void>;
-  signInWithEmail: (email: string, pass: string) => Promise<any>;
-  signUpWithEmail: (email: string, pass: string) => Promise<any>;
+  signInWithEmail: (email: string, pass: string) => Promise<UserCredential>;
+  signUpWithEmail: (email: string, pass: string) => Promise<UserCredential>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,8 +24,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signOut: async () => {},
   updateProfile: async () => {},
-  signInWithEmail: async () => {},
-  signUpWithEmail: async () => {},
+  signInWithEmail: async () => { throw new Error('Função não implementada'); },
+  signUpWithEmail: async () => { throw new Error('Função não implementada'); },
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -49,7 +51,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (docSnap.exists() && docSnap.data().plan) {
           setProfile(docSnap.data() as UserProfile);
         } else {
-          // Cria um perfil padrão para novos utilizadores
           const defaultProfile: UserProfile = { currency: 'EUR', plan: 'free' };
           setDoc(profileDocRef, defaultProfile, { merge: true });
           setProfile(defaultProfile);

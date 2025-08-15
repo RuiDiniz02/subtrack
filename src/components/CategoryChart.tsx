@@ -1,7 +1,9 @@
+// src/components/CategoryChart.tsx
+
 'use client';
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import type { UserSettings } from '@/lib/types';
+// import type { UserSettings } from '@/lib/types'; // Removido
 
 const currencySymbols = {
     EUR: '€',

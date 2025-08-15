@@ -1,12 +1,15 @@
+// src/app/signup/page.tsx
+
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { FirebaseError } from 'firebase/app';
 
 export default function SignUpPage() {
-  const { user, loading, signUpWithEmail } = useAuth(); // Corrigido aqui
+  const { user, loading, signUpWithEmail } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,15 +25,19 @@ export default function SignUpPage() {
     e.preventDefault();
     setError('');
     try {
-      await signUpWithEmail(email, password); // Corrigido aqui
+      await signUpWithEmail(email, password);
       router.push('/dashboard');
-    } catch (err: any) {
-      if (err.code === 'auth/email-already-in-use') {
-        setError('This email is already in use. Try logging in instead.');
+    } catch (err: unknown) {
+      if (err instanceof FirebaseError) {
+        if (err.code === 'auth/email-already-in-use') {
+          setError('This email is already in use. Try logging in instead.');
+        } else {
+          setError('Failed to create an account. Please try again.');
+        }
       } else {
-        setError('Failed to create an account. Please try again.');
+        setError('An unexpected error occurred.');
       }
-      console.error("Erro de registo:", err.message);
+      console.error("Erro de registo:", (err as Error).message);
     }
   };
 
