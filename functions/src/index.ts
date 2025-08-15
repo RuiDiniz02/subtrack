@@ -5,9 +5,31 @@ import Stripe from "stripe";
 admin.initializeApp();
 const db = admin.firestore();
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-07-30.basil", // verifica se é válido
-});
+// --- NOVA ESTRUTURA: INICIALIZAÇÃO PREGUIÇOSA (LAZY INITIALIZATION) ---
+
+// A variável 'stripe' é declarada aqui, mas só será inicializada quando for necessária.
+let stripe: Stripe;
+
+/**
+ * Esta função auxiliar garante que o cliente Stripe é inicializado apenas uma vez
+ * e só quando uma função precisa dele. Isto evita que o servidor crashe no arranque.
+ */
+function getStripeClient() {
+  if (!stripe) {
+    // Lê a chave do ficheiro .env através de process.env
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      throw new Error("A variável de ambiente STRIPE_SECRET_KEY não foi definida.");
+    }
+    stripe = new Stripe(stripeKey, {
+      apiVersion: "2025-07-30.basil",
+    });
+  }
+  return stripe;
+}
+
+// --- FIM DA NOVA ESTRUTURA ---
+
 
 interface CheckoutData {
   priceId: string;
@@ -15,6 +37,8 @@ interface CheckoutData {
 
 export const createStripeCheckout = functions.https.onCall(
   async (request) => {
+    // Inicializa o cliente Stripe SÓ AGORA que a função foi chamada
+    const stripeClient = getStripeClient();
     const data = request.data as CheckoutData;
 
     if (!request.auth) {
@@ -24,7 +48,7 @@ export const createStripeCheckout = functions.https.onCall(
       );
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
       line_items: [
@@ -33,6 +57,7 @@ export const createStripeCheckout = functions.https.onCall(
           quantity: 1,
         },
       ],
+      // Lê a URL do ficheiro .env
       success_url: `${process.env.BASE_URL}/profile?upgrade=success`,
       cancel_url: `${process.env.BASE_URL}/upgrade`,
       metadata: {
@@ -45,12 +70,21 @@ export const createStripeCheckout = functions.https.onCall(
 );
 
 export const stripeWebhook = functions.https.onRequest(async (req, res) => {
+  // Inicializa o cliente Stripe SÓ AGORA que a função foi chamada
+  const stripeClient = getStripeClient();
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    console.error("O segredo do webhook (STRIPE_WEBHOOK_SECRET) não está definido.");
+    res.status(400).send("Webhook secret is not configured.");
+    return;
+  }
+  
   const signature = req.headers["stripe-signature"] as string;
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(req.rawBody, signature, endpointSecret);
+    event = stripeClient.webhooks.constructEvent(req.rawBody, signature, webhookSecret);
   } catch (err: any) {
     console.error("⚠️ Erro na verificação do webhook.", err.message);
     res.status(400).send(`Webhook Error: ${err.message}`);
